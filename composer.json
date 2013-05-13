@@ -24,6 +24,6 @@
 
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
-        "symfony/console": "2.3.0-beta2"
+        "symfony/console": "2.0.5"
     }
 }
