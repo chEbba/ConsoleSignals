@@ -1,6 +1,6 @@
 {
     "name": "che/console-signals",
-    "description": "Unix signal support for Symfony console",
+    "description": "Unix signal support for Symfony Console",
     "keywords": ["console", "signal", "pcntl", "process", "restart"],
     "homepage": "http://github.com/chEbba/ConsoleSignals",
     "type": "library",

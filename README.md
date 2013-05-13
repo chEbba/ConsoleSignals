@@ -1,4 +1,4 @@
 ConsoleSignals
 ==============
 
-Unix signal support for Symfony console
+Unix signal support for Symfony Console
