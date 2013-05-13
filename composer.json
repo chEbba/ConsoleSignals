@@ -1,0 +1,29 @@
+{
+    "name": "che/console-signals",
+    "description": "Unix signal support for Symfony console",
+    "keywords": ["console", "signal", "pcntl", "process", "restart"],
+    "homepage": "http://github.com/chEbba/ConsoleSignals",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kirill chEbba Chebunin",
+            "email": "iam@chebba.org",
+            "homepage": "http://github.com/chEbba"
+        }
+    ],
+
+    "autoload": {
+        "psr-0": { "Che\\ConsoleSignals": "src/" }
+    },
+
+    "require": {
+        "php": ">=5.4.1",
+        "symfony/console": "2.*"
+    },
+
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*",
+        "symfony/console": "2.3.0-beta2"
+    }
+}
