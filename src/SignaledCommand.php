@@ -26,6 +26,19 @@ abstract class SignaledCommand extends Command
     private $signalsEnabled = false;
     private $signalCallbacks = [];
 
+    public static final function getDefaultStopSignals()
+    {
+        return [
+            SIGTERM,
+            SIGINT
+        ];
+    }
+
+    public function getStopSignals()
+    {
+        return self::getDefaultStopSignals();
+    }
+
     abstract protected function doExecute(InputInterface $input, OutputInterface $output);
 
     /**
@@ -34,6 +47,11 @@ abstract class SignaledCommand extends Command
     protected function configure()
     {
         $this->addOption('no-signals', null, InputOption::VALUE_NONE, 'Disable signal handling');
+
+        $stopCallback = $this->createStopSignalCallback();
+        foreach ($this->getStopSignals() as $signal) {
+            $this->addSignalCallback($signal, $stopCallback);
+        }
     }
 
     /**
@@ -44,12 +62,11 @@ abstract class SignaledCommand extends Command
         $this->start();
 
         if ($this->isSignalSupportEnabled($input)) {
-            $output->writeln('Signal support is enabled');
-            $stopCallback = $this->createStopSignalCallback($output);
-            $this->addSignalCallback(SIGTERM, $stopCallback);
-            $this->addSignalCallback(SIGINT, $stopCallback);
+            if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+                $output->writeln('Signal support is enabled');
+            }
 
-            $this->registerSignals($output);
+            $this->registerSignals($input, $output);
         }
 
         $this->doExecute($input, $output);
@@ -97,7 +114,7 @@ abstract class SignaledCommand extends Command
         return extension_loaded('pcntl') && (!$input->hasOption('no-signals') || !$input->getOption('no-signals'));
     }
 
-    private function registerSignals(OutputInterface $output = null)
+    private function registerSignals(InputInterface $input, OutputInterface $output)
     {
         if ($this->signalsEnabled) {
             return;
@@ -105,21 +122,23 @@ abstract class SignaledCommand extends Command
 
         foreach ($this->signalCallbacks as $signal => $callbacks) {
             foreach ($callbacks as $callback) {
-                if ($output) {
+                if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
                     $output->writeln(sprintf('Register signal %s', $signal));
                 }
-                pcntl_signal($signal, $callback);
+                pcntl_signal($signal, function($signo) use ($callback, $input, $output) {
+                    $callback($signo, $input, $output);
+                });
             }
         }
 
         $this->signalsEnabled = true;
     }
 
-    private function createStopSignalCallback(OutputInterface $output = null)
+    private function createStopSignalCallback()
     {
-        return function () use ($output) {
-            if ($output) {
-                $output->writeln('Got stop signal. Stopping...');
+        return function ($signo, InputInterface $input, OutputInterface $output) {
+            if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+                $output->writeln(sprintf('Got stop signal "%s". Stopping...', $signo));
             }
             $this->stop();
         };
