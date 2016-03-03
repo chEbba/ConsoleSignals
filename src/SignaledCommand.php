@@ -29,8 +29,8 @@ abstract class SignaledCommand extends Command
     public static final function getDefaultStopSignals()
     {
         return [
-            SIGTERM,
-            SIGINT
+            defined('SIGTERM') ? SIGTERM : 'SIGTERM',
+            defined('SIGINT') ? SIGINT : 'SIGINT'
         ];
     }
 
