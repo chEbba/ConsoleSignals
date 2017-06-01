@@ -28,10 +28,10 @@ abstract class SignaledCommand extends Command
 
     public static final function getDefaultStopSignals()
     {
-        return [
+        return extension_loaded('pcntl') ? [
             SIGTERM,
             SIGINT
-        ];
+        ] : [];
     }
 
     public function getStopSignals()
