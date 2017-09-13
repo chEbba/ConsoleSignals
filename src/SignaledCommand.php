@@ -17,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Console command with signal support
  *
- * @author Kirill chEbba Chebunin <iam@chebba.org>
+ * @author  Kirill chEbba Chebunin <iam@chebba.org>
  * @license http://opensource.org/licenses/mit-license.php MIT
  */
 abstract class SignaledCommand extends Command
@@ -30,7 +30,7 @@ abstract class SignaledCommand extends Command
     {
         return extension_loaded('pcntl') ? [
             SIGTERM,
-            SIGINT
+            SIGINT,
         ] : [];
     }
 
@@ -121,14 +121,17 @@ abstract class SignaledCommand extends Command
         }
 
         foreach ($this->signalCallbacks as $signal => $callbacks) {
-            foreach ($callbacks as $callback) {
-                if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
-                    $output->writeln(sprintf('Register signal %s', $signal));
-                }
-                pcntl_signal($signal, function($signo) use ($callback, $input, $output) {
-                    $callback($signo, $input, $output);
-                });
+            if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+                $output->writeln(sprintf('Register signal %s', $signal));
             }
+            pcntl_signal($signal, function ($signo) use ($callbacks, $input, $output) {
+                if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+                    $output->writeln(sprintf('Executing %d callbacks for signal %d', count($callbacks), $signo));
+                }
+                foreach ($callbacks as $callback) {
+                    $callback($signo, $input, $output);
+                }
+            });
         }
 
         $this->signalsEnabled = true;
